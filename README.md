@@ -39,3 +39,4 @@ Data Format:
 
 TODO:
 1. Add a converter function to convert course schedule format of different universities to this common format
+2. Add a web interface
