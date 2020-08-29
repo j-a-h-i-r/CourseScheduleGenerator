@@ -162,7 +162,10 @@ def printSchedule(sections):
             isLab = schedule.get('isLab')
             courseCode = schedule['courseCode']
             section = schedule['section']
-            print(courseCode, section, start, end)
+            if isLab:
+                print(courseCode, section, start, end, '(Lab)')
+            else:
+                print(courseCode, section, start, end)
 
 if __name__ == '__main__':
     courseDict = data.getTestData()
