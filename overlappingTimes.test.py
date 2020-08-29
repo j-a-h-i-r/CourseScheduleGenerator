@@ -17,10 +17,10 @@ overlappingTimes = [
 
 class TestOverlappingTimes(unittest.TestCase):
     def testNonOverlapping(self):
-        self.assertFalse(courseSelector.isOverlappingTimes(nonOverLappingTimes))
+        self.assertFalse(courseSelector.isOverlappingTimesForSingleDay(nonOverLappingTimes))
     
     def testOverlapping(self):
-        self.assertTrue(courseSelector.isOverlappingTimes(overlappingTimes))
+        self.assertTrue(courseSelector.isOverlappingTimesForSingleDay(overlappingTimes))
 
 
 if __name__ == '__main__':

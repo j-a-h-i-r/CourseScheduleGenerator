@@ -11,7 +11,10 @@ SHOW = logging.DEBUG
 HIDE = logging.CRITICAL
 logging.basicConfig(format="%(levelname)s: %(message)s", level=HIDE)
 
-def getAllSectionCombinations(courses: list):
+def getAllSectionCombinations(courses: list) -> list:
+    '''
+    Return all possible combinations of the sections of different courses
+    '''
     sections = []
     for course in courses:
         courseSections = []
@@ -24,15 +27,18 @@ def getAllSectionCombinations(courses: list):
     return sectionCombinations
 
 def convertHhMmToMinutes(hhMMStr: str) -> int:
+    '''
+    Take a time in string in HH:MM format and convert it to minutes
+    '''
     hh, mm = hhMMStr.split(':')
-    hhInt = int(hh)
-    mmInt = int(mm)
+    hhInt, mmInt = map(int, [hh, mm])
     minutes = hhInt*24 + mmInt
     return minutes
 
-def cmpByStartTime(time1: str, time2: str):
+def cmpByStartTime(time1: dict, time2: dict) -> int:
     '''
-    time1: time in HH:MM format
+    A custom comparator function for sorting schedules based on start time
+    time1: A schedule containing `start` and `end` time in `HH:MM` format
     '''
     time1Start = time1['start']
     time2Start = time2['start']
@@ -40,80 +46,75 @@ def cmpByStartTime(time1: str, time2: str):
     time2StartInMinutes = convertHhMmToMinutes(time2Start)
     return time1StartInMinutes - time2StartInMinutes
 
-def isOverlappingTimes(times: list):
+def isOverlappingTimesForSingleDay(times: list) -> bool:
     '''
-    Check if the times are overlapping.
-    times - [{start: '10:10', end: '11:40'}]
+    Check if the times are overlapping. `times` contain the schedule of sections
+    for a single day.
+    times: 
+        - [{start: '10:10', end: '11:40'}]
     '''
-
-    # Convert HH:MM times to minute only. This will make the comparision easier
     sortedTimes = sorted(times, key=cmp_to_key(cmpByStartTime))
     for i in range(1, len(sortedTimes)):
         if sortedTimes[i-1]['end'] > sortedTimes[i]['start']:
             return True 
     return False
 
-def isOverlappingSchedule(schedulesByDay: dict):
+def isOverlappingSchedule(schedulesPerDay: dict) -> bool:
     '''
-    Get a schedules by day and check if it has any overlapping schedule
-    Schedule Format: {start: '10:10', end: '11:40'}
+    Get schedules per day and check if it has any overlapping schedule.
+    schedulesPerDay: 
+        - {'Monday: [{start: '10:10', end: '11:40'}]}
     '''
-    for day in schedulesByDay:
-        isOverlapping = isOverlappingTimes(schedulesByDay[day])
+    for day in schedulesPerDay:
+        isOverlapping = isOverlappingTimesForSingleDay(schedulesPerDay[day])
         if isOverlapping:
             return True
     return False
 
-def isCombinationValid(sectionCombination):
+def isCombinationOfSectionsValid(sectionCombination: list) -> bool:
     '''
     Validate a section combination. A combination is valid if it does not 
     have any overlapping time.
     '''
-    timesByDay = {}
+    schedulePerDay = {}
     for section in sectionCombination:
         sectionSchedules = section['sectionSchedule']
-        for schedule in sectionSchedules:
+        labSchedules = section.get('labSchedule', [])
+        allSchedules = sectionSchedules + labSchedules
+        
+        for schedule in allSchedules:
             day = schedule.get('day')
             startTime = schedule.get('start')
             endTime = schedule.get('end')
-            if day in timesByDay:
-                timesByDay[day].append({
-                    'start': startTime,
-                    'end': endTime
-                })
-            else:
-                timesByDay[day] = [{
-                    'start': startTime,
-                    'end': endTime
-                }]
-        labSchedules = section.get('labSchedule', [])
-        for labSchedule in labSchedules:
-            day = labSchedule.get('day')
-            startTime = labSchedule.get('start')
-            endTime = labSchedule.get('end')
             scheduleDict = {
                 'start': startTime,
                 'end': endTime
             }
-            if day in timesByDay:
-                timesByDay[day].append(scheduleDict)
+            if day in schedulePerDay:
+                schedulePerDay[day].append(scheduleDict)
             else:
-                timesByDay[day] = [scheduleDict]
-    isOverlapping = isOverlappingSchedule(timesByDay)
-    return not isOverlapping
+                schedulePerDay[day] = [scheduleDict]
 
-def getCourseCombinations(courseDict):
-    sectionCombinations = getAllSectionCombinations(courseDict)
+    scheduleIsOverlapping = isOverlappingSchedule(schedulePerDay)
+    return not scheduleIsOverlapping
+
+def getCourseCombinations(courseList: list) -> list:
+    '''
+    Get valid section combinations from course list
+    '''
+    sectionCombinations = getAllSectionCombinations(courseList)
     validCombinations = []
     for sectionCombination in sectionCombinations:
-        combinationValid = isCombinationValid(sectionCombination)
+        combinationValid = isCombinationOfSectionsValid(sectionCombination)
         if combinationValid:
             validCombinations.append(sectionCombination)
     return validCombinations
 
-def printSchedule(sections):
-    # print(sections)
-    scheduleByDay = dict()
+def printSchedule(sections: list):
+    '''
+    Print a basic schedule
+    '''
+    schedulePerDay = dict()
     for section in sections:
         sectionNumber = section['section']
         courseCode = section['courseCode']
@@ -130,10 +131,10 @@ def printSchedule(sections):
                 'section': sectionNumber,
                 'courseCode': courseCode
             }
-            if day in scheduleByDay:
-                scheduleByDay[day].append(scheduleDict)
+            if day in schedulePerDay:
+                schedulePerDay[day].append(scheduleDict)
             else:
-                scheduleByDay[day] = [scheduleDict]
+                schedulePerDay[day] = [scheduleDict]
         for labSchedule in labSchedules:
             startTime = labSchedule['start']
             endTime = labSchedule['end']
@@ -145,14 +146,14 @@ def printSchedule(sections):
                 'courseCode': courseCode,
                 'isLab': True
             }
-            if day in scheduleByDay:
-                scheduleByDay[day].append(scheduleDict)
+            if day in schedulePerDay:
+                schedulePerDay[day].append(scheduleDict)
             else:
-                scheduleByDay[day] = [scheduleDict]
+                schedulePerDay[day] = [scheduleDict]
 
     days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday']
     for day in days:
-        scheduleInDay = scheduleByDay.get(day, [])
+        scheduleInDay = schedulePerDay.get(day, [])
         scheduleInDaySorted = sorted(scheduleInDay, key=cmp_to_key(cmpByStartTime))
         print(day)
         print('-' * len(day))
