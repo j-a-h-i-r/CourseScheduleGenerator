@@ -32,7 +32,7 @@ def convertHhMmToMinutes(hhMMStr: str) -> int:
     '''
     hh, mm = hhMMStr.split(':')
     hhInt, mmInt = map(int, [hh, mm])
-    minutes = hhInt*24 + mmInt
+    minutes = hhInt*60 + mmInt
     return minutes
 
 def cmpByStartTime(time1: dict, time2: dict) -> int:
