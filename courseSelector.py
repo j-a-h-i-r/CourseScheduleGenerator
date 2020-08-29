@@ -3,117 +3,21 @@ import itertools
 import pprint
 from functools import cmp_to_key
 
+import data
+
 pp = pprint.PrettyPrinter(indent=4, compact=False)
 
 SHOW = logging.DEBUG
 HIDE = logging.CRITICAL
 logging.basicConfig(format="%(levelname)s: %(message)s", level=HIDE)
 
-courseDict = {
-    'CSE360': {
-        'sections': [
-            {
-                'section': '1',
-                'sectionSchedule': [
-                    {
-                        'start': '10:10',
-                        'end': '11:40',
-                        'day': 'Monday'
-                    }, {
-                        'start': '10:10',
-                        'end': '11:40',
-                        'day': 'Wednesday'
-                    }
-                ],
-                'labSchedule': [
-                    {
-                        'start': '13:30',
-                        'end': '15:30',
-                        'day': 'Sunday'
-                    }
-                ]
-            }
-        ]
-    },
-    'CSE365': {
-        'sections': [
-            {
-                'section': '1',
-                'sectionSchedule': [
-                    {
-                        'start': '10:10',
-                        'end': '11:40',
-                        'day': 'Monday'
-                    }, {
-                        'start': '10:10',
-                        'end': '11:40',
-                        'day': 'Wednesday'
-                    }
-                ],
-                'labSchedule': [
-                    {
-                        'start': '1:30',
-                        'end': '3:30',
-                        'day': 'Sunday'
-                    }
-                ]
-            }, {
-                'section': '2',
-                'sectionSchedule': [
-                    {
-                        'start': '10:10',
-                        'end': '11:40',
-                        'day': 'Tuesday'
-                    }, {
-                        'start': '10:10',
-                        'end': '11:40',
-                        'day': 'Thursday'
-                    }
-                ],
-                'labSchedule': [
-                    {
-                        'start': '13:30',
-                        'end': '15:30',
-                        'day': 'Thursday'
-                    }
-                ]
-            }
-        ]
-    },
-    'CSE375': {
-        'sections': [
-            {
-                'section': '1',
-                'sectionSchedule': [
-                    {
-                        'start': '10:10',
-                        'end': '11:40',
-                        'day': 'Sunday'
-                    }, {
-                        'start': '8:30',
-                        'end': '10:00',
-                        'day': 'Wednesday'
-                    }
-                ],
-                'labSchedule': [
-                    {
-                        'start': '8:00',
-                        'end': '10:00',
-                        'day': 'Sunday'
-                    }
-                ]
-            }
-        ]
-    }
-}
-
-
-def getAllCourseCombinations(courseDict):
+def getAllSectionCombinations(courses: list):
     sections = []
-    for course in courseDict:
+    for course in courses:
         courseSections = []
-        for section in courseDict[course]['sections']:
-            section['courseCode'] = course
+        courseCode = course['courseCode']
+        for section in course['sections']:
+            section['courseCode'] = courseCode
             courseSections.append(section)
         sections.append(courseSections)
     sectionCombinations = list(itertools.product(*sections))
@@ -199,7 +103,7 @@ def isCombinationValid(sectionCombination):
     return not isOverlapping
 
 def getCourseCombinations(courseDict):
-    sectionCombinations = getAllCourseCombinations(courseDict)
+    sectionCombinations = getAllSectionCombinations(courseDict)
     validCombinations = []
     for sectionCombination in sectionCombinations:
         combinationValid = isCombinationValid(sectionCombination)
@@ -261,6 +165,7 @@ def printSchedule(sections):
             print(courseCode, section, start, end)
 
 if __name__ == '__main__':
+    courseDict = data.getTestData()
     validSectionCombinations = getCourseCombinations(courseDict)
     for i, sectionCombination in enumerate(validSectionCombinations, 1):
         header = f'Schedule {i}'
