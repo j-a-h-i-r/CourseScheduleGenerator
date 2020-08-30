@@ -1,6 +1,6 @@
 import unittest
 
-import courseSelector
+import scheduleGenerator
 
 nonOverLappingTimes = [
     {'start': '10:10', 'end': '11:40'},
@@ -54,15 +54,15 @@ overlappingSchedule1 = {
 
 class TestOverlappingTimes(unittest.TestCase):
     def testNonOverlapping(self):
-        self.assertFalse(courseSelector.isOverlappingTimesForSingleDay(nonOverLappingTimes))
+        self.assertFalse(scheduleGenerator.isOverlappingTimesForSingleDay(nonOverLappingTimes))
     
     def testOverlapping(self):
-        self.assertTrue(courseSelector.isOverlappingTimesForSingleDay(overlappingTimes))
+        self.assertTrue(scheduleGenerator.isOverlappingTimesForSingleDay(overlappingTimes))
     
     def testisOverlappingSchedule(self):
-        self.assertFalse(courseSelector.isOverlappingSchedule(nonOverlappingSchedule1))
-        self.assertFalse(courseSelector.isOverlappingSchedule(nonOverlappingSchedule2))
-        self.assertTrue(courseSelector.isOverlappingSchedule(overlappingSchedule1))
+        self.assertFalse(scheduleGenerator.isOverlappingSchedule(nonOverlappingSchedule1))
+        self.assertFalse(scheduleGenerator.isOverlappingSchedule(nonOverlappingSchedule2))
+        self.assertTrue(scheduleGenerator.isOverlappingSchedule(overlappingSchedule1))
 
 if __name__ == '__main__':
     unittest.main()
